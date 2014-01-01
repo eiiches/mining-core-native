@@ -22,8 +22,22 @@ public class NativeVectorOp {
 				throw new IllegalArgumentException("The byte order is not compatible with native code.");
 	}
 
+	private static native boolean checkAlignment(final ByteBuffer buf);
+
+	private static void checkAlignment(final DenseByteBufferVector... vs) {
+		for (final DenseByteBufferVector v : vs)
+			if (!checkAlignment(v.raw()))
+				throw new IllegalArgumentException("The alignment is not compatible with native code.");
+	}
+
+	private static void check(final DenseByteBufferVector... vs) {
+		checkByteOrder(vs);
+		checkAlignment(vs);
+	}
+
 	public static double dot(final DenseByteBufferVector v1, final DenseByteBufferVector v2) {
-		checkByteOrder(v1, v2);
+		check(v1, v2);
+
 		final int size = Math.min(v1.size(), v2.size());
 		return dot(v1.raw(), v2.raw(), size);
 	}
