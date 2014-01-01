@@ -61,7 +61,7 @@ public class NativeMathOperatorPerfTest {
 		final long start = System.currentTimeMillis();
 
 		for (int i = 0; i < N; ++i)
-			MatrixOp.assign_X_Y(h.raw(), x.raw(), w.raw(), null, 1);
+			new DefaultMathOperator().assignMultiply(h, x, w);
 
 		final long end = System.currentTimeMillis();
 		System.out.printf("Time(Java): %d msec%n", end - start);
