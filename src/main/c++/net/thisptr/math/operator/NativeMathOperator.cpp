@@ -315,8 +315,8 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Cop
 		jobject src_buf, jint src_index,
 		jint count)
 {
-	double *dest_ptr = (double *) env->GetDirectBufferAddress(dest_buf);
-	double *src_ptr = (double *) env->GetDirectBufferAddress(src_buf);
+	double *dest_ptr = ((double *) env->GetDirectBufferAddress(dest_buf)) + dest_index;
+	double *src_ptr = ((double *) env->GetDirectBufferAddress(src_buf)) + src_index;
 	for (int i = 0; i < count; ++i)
 		*dest_ptr++ = *src_ptr++;
 }
