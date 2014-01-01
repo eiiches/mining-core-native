@@ -11,10 +11,10 @@ import org.junit.Test;
 public class NativeMathOperatorTest {
 	private static final double eps = 0.000001;
 
-	private MathOperator sut = new NativeMathOperator(new NullMathOperator());
+	private MathOperator sut = new NativeMathOperator(TestMathOperators.nullMathOperator());
 
 	@Test
-	public void testDot() {
+	public void test__Dot() {
 		final Vector v1 = new DenseByteBufferVector(2);
 		final Vector v2 = new DenseByteBufferVector(2);
 		v1.set(1, 1.0);
@@ -24,7 +24,7 @@ public class NativeMathOperatorTest {
 	}
 
 	@Test
-	public void testAssignMultiplyMatrixMatrix() {
+	public void test__AssignMultiplyMatrixMatrix() {
 		final Matrix r = new DenseByteBufferMatrix(2, 4);
 		final Matrix x = new DenseByteBufferMatrix(2, 3);
 		final Matrix y = new DenseByteBufferMatrix(3, 4);
@@ -38,7 +38,7 @@ public class NativeMathOperatorTest {
 	}
 
 	@Test
-	public void testAssignMultiplyMatrixVector() {
+	public void test__AssignMultiplyMatrixVector() {
 		final Vector r = new DenseByteBufferVector(2);
 		final Matrix x = new DenseByteBufferMatrix(2, 3);
 		final Vector y = new DenseByteBufferVector(3);

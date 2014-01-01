@@ -35,10 +35,8 @@ public class NativeMathOperator implements MathOperator {
 		Check.checkDenseByteBufferVector(v1, v2);
 		assert v1.size() == v2.size();
 
-		return dot(v1.raw(), v2.raw(), v1.size());
+		return __Dot(v1.raw(), v2.raw(), v1.size());
 	}
-
-	private static native double dot(final ByteBuffer v1, final ByteBuffer v2, final int size);
 
 	@Override
 	public void assignMultiply(final Matrix result, final Matrix x, final Matrix y) {
@@ -55,13 +53,8 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		assignMultiplyMatrixMatrix(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), result.rows(), result.columns(), x.columns());
+		__AssignMultiplyMatrixMatrix(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), result.rows(), result.columns(), x.columns());
 	}
-
-	private static native void assignMultiplyMatrixMatrix(final ByteBuffer result, final boolean resultRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
-			final ByteBuffer y, final boolean yRowMajor,
-			final int rows, final int columns, final int k);
 
 	@Override
 	public void assignMultiply(final Vector result, final Matrix x, final Vector y) {
@@ -78,13 +71,160 @@ public class NativeMathOperator implements MathOperator {
 		assert result.size() == x.rows();
 		assert x.columns() == y.size();
 
-		assignMultiplyMatrixVector(result.raw(), x.raw(), x.rowMajor(), y.raw(), result.size(), y.size());
+		__AssignMultiplyMatrixVector(result.raw(), x.raw(), x.rowMajor(), y.raw(), result.size(), y.size());
 	}
 
-	private static native void assignMultiplyMatrixVector(final ByteBuffer result,
+	@Override
+	public void assignMultiply(final Matrix result, final Matrix x, final double s) {
+		if (result instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+			assignMultiply((DenseByteBufferMatrix) result, (DenseByteBufferMatrix) x, s);
+			return;
+		}
+		parent.assignMultiply(result, x, s);
+	}
+
+	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final double s) {
+		Check.checkDenseByteBufferMatrix(result, x);
+		assert result.rows() == x.rows();
+		assert result.columns() == x.columns();
+
+		__AssignMultiplyMatrixScaler(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), s, result.rows(), result.columns());
+	}
+
+	@Override
+	public void assignZero(final Vector v) {
+		if (v instanceof DenseByteBufferVector) {
+			assignZero((DenseByteBufferVector) v);
+			return;
+		}
+		parent.assignZero(v);
+	}
+
+	public void assignZero(final DenseByteBufferVector v) {
+		Check.checkDenseByteBufferVector(v);
+
+		__AssignZeroVector(v.raw(), v.size());
+	}
+
+	@Override
+	public void assignZero(final Matrix m) {
+		if (m instanceof DenseByteBufferMatrix) {
+			assignZero((DenseByteBufferMatrix) m);
+			return;
+		}
+		parent.assignZero(m);
+	}
+
+	public void assignZero(final DenseByteBufferMatrix m) {
+		Check.checkDenseByteBufferMatrix(m);
+
+		__AssignZeroMatrix(m.raw(), m.rowMajor(), m.rows(), m.columns());
+	}
+
+	@Override
+	public void addMultiply(final Matrix self, final Matrix x, final double s) {
+		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+			addMultiply((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x, s);
+			return;
+		}
+		parent.addMultiply(self, x, s);
+	}
+
+	public void addMultiply(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x, final double s) {
+		Check.checkDenseByteBufferMatrix(self, x);
+		assert self.rows() == x.rows();
+		assert self.columns() == x.columns();
+
+		__AddMultiplyMatrixScaler(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), s, self.rows(), self.columns());
+	}
+
+	@Override
+	public void addMultiply(final Matrix self, final Matrix x, final Matrix y, final double s) {
+		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferMatrix) {
+			addMultiply((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x, (DenseByteBufferMatrix) y, s);
+			return;
+		}
+		parent.addMultiply(self, x, y, s);
+	}
+
+	public void addMultiply(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
+		Check.checkDenseByteBufferMatrix(self, x, y);
+		assert self.rows() == x.rows();
+		assert self.columns() == y.columns();
+		assert x.columns() == y.rows();
+
+		__AddMultiply(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
+	}
+
+	@Override
+	public void add(final Matrix self, final Matrix x) {
+		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+			add((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x);
+			return;
+		}
+		parent.add(self, x);
+	}
+
+	public void add(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x) {
+		Check.checkDenseByteBufferMatrix(self, x);
+		assert self.rows() == x.rows();
+		assert self.columns() == x.columns();
+
+		__AddMatrix(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), self.rows(), self.columns());
+	}
+
+	@Override
+	public void copyElements(final Vector dest, final int destIndex, final Vector src, final int srcIndex, final int count) {
+		if (dest instanceof DenseByteBufferVector && src instanceof DenseByteBufferVector) {
+			copyElements((DenseByteBufferVector) dest, destIndex, (DenseByteBufferVector) src, srcIndex, count);
+			return;
+		}
+		parent.copyElements(dest, destIndex, src, srcIndex, count);
+	}
+
+	public void copyElements(final DenseByteBufferVector dest, final int destIndex, final DenseByteBufferVector src, final int srcIndex, final int count) {
+		Check.checkDenseByteBufferVector(dest, src);
+
+		__CopyElements(dest.raw(), destIndex, src.raw(), srcIndex, count);
+	}
+
+	private static native void __CopyElements(final ByteBuffer dest, final int destIndex, final ByteBuffer src, final int srcIndex, final int count);
+
+	private static native double __Dot(final ByteBuffer v1, final ByteBuffer v2, final int size);
+
+	private static native void __AssignMultiplyMatrixMatrix(final ByteBuffer result, final boolean resultRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final ByteBuffer y, final boolean yRowMajor,
+			final int rows, final int columns, final int k);
+
+	private static native void __AssignMultiplyMatrixVector(final ByteBuffer result,
 			final ByteBuffer x, final boolean xRowMajor,
 			final ByteBuffer y,
 			int rows, int k);
+
+	private static native void __AssignMultiplyMatrixScaler(final ByteBuffer result, boolean resultRowMajor,
+			final ByteBuffer x, boolean xRowMajor,
+			double s,
+			int rows, int columns);
+
+	private static native void __AssignZeroVector(final ByteBuffer result, final int size);
+
+	private static native void __AssignZeroMatrix(final ByteBuffer result, final boolean rowMajor, final int rows, final int columns);
+
+	private static native void __AddMultiplyMatrixScaler(final ByteBuffer self, final boolean selfRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final double s,
+			final int rows, final int columns);
+
+	private static native void __AddMultiply(final ByteBuffer self, final boolean selfRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final ByteBuffer y, final boolean yRowMajor,
+			final double s,
+			final int rows, final int columns, final int k);
+
+	private static native void __AddMatrix(final ByteBuffer self, final boolean selfRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final int rows, final int columns);
 
 	private static class Check {
 		private static void check(final ByteBuffer buf) {
