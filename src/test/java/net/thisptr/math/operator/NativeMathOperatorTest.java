@@ -3,7 +3,6 @@ package net.thisptr.math.operator;
 import static org.junit.Assert.assertEquals;
 import net.thisptr.math.matrix.DenseByteBufferMatrix;
 import net.thisptr.math.matrix.Matrix;
-import net.thisptr.math.vector.DenseArrayVector;
 import net.thisptr.math.vector.DenseByteBufferVector;
 import net.thisptr.math.vector.Vector;
 
