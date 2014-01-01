@@ -55,10 +55,13 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		assignMultiplyMatrixMatrix(result.raw(), x.raw(), y.raw(), result.rows(), result.columns(), x.columns());
+		assignMultiplyMatrixMatrix(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), result.rows(), result.columns(), x.columns());
 	}
 
-	private static native void assignMultiplyMatrixMatrix(final ByteBuffer result, final ByteBuffer x, final ByteBuffer y, final int rows, final int columns, final int k);
+	private static native void assignMultiplyMatrixMatrix(final ByteBuffer result, final boolean resultRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final ByteBuffer y, final boolean yRowMajor,
+			final int rows, final int columns, final int k);
 
 	@Override
 	public void assignMultiply(final Vector result, final Matrix x, final Vector y) {
@@ -75,10 +78,13 @@ public class NativeMathOperator implements MathOperator {
 		assert result.size() == x.rows();
 		assert x.columns() == y.size();
 
-		assignMultiplyMatrixVector(result.raw(), x.raw(), y.raw(), result.size(), y.size());
+		assignMultiplyMatrixVector(result.raw(), x.raw(), x.rowMajor(), y.raw(), result.size(), y.size());
 	}
 
-	private static native void assignMultiplyMatrixVector(final ByteBuffer result, final ByteBuffer x, final ByteBuffer y, int rows, int k);
+	private static native void assignMultiplyMatrixVector(final ByteBuffer result,
+			final ByteBuffer x, final boolean xRowMajor,
+			final ByteBuffer y,
+			int rows, int k);
 
 	private static class Check {
 		private static void check(final ByteBuffer buf) {

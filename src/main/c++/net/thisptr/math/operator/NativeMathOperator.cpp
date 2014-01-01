@@ -20,25 +20,71 @@ JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator_dot(
 /*
  * Class:     net_thisptr_math_operator_NativeMathOperator
  * Method:    assignMultiplyMatrixMatrix
- * Signature: (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;III)V
+ * Signature: (Ljava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZIII)V
  */
-JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator_assignMultiplyMatrixMatrix(JNIEnv *env, jclass klass, jobject r_buf, jobject x_buf, jobject y_buf, jint r_rows, jint r_columns, jint k)
+JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator_assignMultiplyMatrixMatrix(JNIEnv *env,
+		jclass klass,
+		jobject r_buf, jboolean r_row_major,
+		jobject x_buf, jboolean x_row_major,
+		jobject y_buf, jboolean y_row_major,
+		jint r_rows, jint r_columns, jint k)
 {
 	Eigen::Map<DenseByteBufferMatrix, Eigen::Aligned> r((double *) env->GetDirectBufferAddress(r_buf), r_rows, r_columns);
 	Eigen::Map<const DenseByteBufferMatrix, Eigen::Aligned> x((double *) env->GetDirectBufferAddress(x_buf), r_rows, k);
 	Eigen::Map<const DenseByteBufferMatrix, Eigen::Aligned> y((double *) env->GetDirectBufferAddress(y_buf), k, r_columns);
-	r.noalias() = x * y;
+
+	// FIXME: use template to handle all cases
+	if (x_row_major) {
+		if (y_row_major) {
+			if (r_row_major) {
+				r.noalias() = x * y;
+			} else {
+				r.transpose().noalias() = x * y;
+			}
+		} else {
+			if (r_row_major) {
+				r.noalias() = x * y.transpose();
+			} else {
+				r.transpose().noalias() = x * y.transpose();
+			}
+		}
+	} else {
+		if (y_row_major) {
+			if (r_row_major) {
+				r.noalias() = x.transpose() * y;
+			} else {
+				r.transpose().noalias() = x.transpose() * y;
+			}
+		} else {
+			if (r_row_major) {
+				r.noalias() = x.transpose() * y.transpose();
+			} else {
+				r.transpose().noalias() = x.transpose() * y.transpose();
+			}
+		}
+	}
 }
 
 /*
  * Class:     net_thisptr_math_operator_NativeMathOperator
  * Method:    assignMultiplyMatrixVector
- * Signature: (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;II)V
+ * Signature: (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;II)V
  */
-JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator_assignMultiplyMatrixVector(JNIEnv *env, jclass klass, jobject r_buf, jobject x_buf, jobject y_buf, jint r_rows, jint k)
+JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator_assignMultiplyMatrixVector(JNIEnv *env,
+		jclass klass,
+		jobject r_buf,
+		jobject x_buf, jboolean x_row_major,
+		jobject y_buf,
+		jint r_rows, jint k)
 {
 	Eigen::Map<DenseByteBufferVector, Eigen::Aligned> r((double *) env->GetDirectBufferAddress(r_buf), r_rows);
 	Eigen::Map<const DenseByteBufferMatrix, Eigen::Aligned> x((double *) env->GetDirectBufferAddress(x_buf), r_rows, k);
 	Eigen::Map<const DenseByteBufferVector, Eigen::Aligned> y((double *) env->GetDirectBufferAddress(y_buf), k);
-	r.noalias() = x * y;
+
+	// FIXME: use template to handle all cases
+	if (x_row_major) {
+		r.noalias() = x * y;
+	} else {
+		r.noalias() = x.transpose() * y;
+	}
 }
