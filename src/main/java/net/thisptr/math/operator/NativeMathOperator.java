@@ -153,7 +153,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.columns() == y.columns();
 		assert x.columns() == y.rows();
 
-		__AddMultiply(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
+		__AddMultiplyMatrixMatrixScaler(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class NativeMathOperator implements MathOperator {
 			final double s,
 			final int rows, final int columns);
 
-	private static native void __AddMultiply(final ByteBuffer self, final boolean selfRowMajor,
+	private static native void __AddMultiplyMatrixMatrixScaler(final ByteBuffer self, final boolean selfRowMajor,
 			final ByteBuffer x, final boolean xRowMajor,
 			final ByteBuffer y, final boolean yRowMajor,
 			final double s,

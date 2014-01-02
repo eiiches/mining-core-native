@@ -211,10 +211,10 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Add
 
 /*
  * Class:     net_thisptr_math_operator_NativeMathOperator
- * Method:    __AddMultiply
+ * Method:    __AddMultiplyMatrixMatrixScaler
  * Signature: (Ljava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZDIII)V
  */
-JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AddMultiply(JNIEnv *env, jclass,
+JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AddMultiplyMatrixMatrixScaler(JNIEnv *env, jclass,
 		jobject r_buf, jboolean r_row_major,
 		jobject x_buf, jboolean x_row_major,
 		jobject y_buf, jboolean y_row_major,
