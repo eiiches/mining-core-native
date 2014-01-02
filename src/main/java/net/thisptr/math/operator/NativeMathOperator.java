@@ -188,6 +188,28 @@ public class NativeMathOperator implements MathOperator {
 		__CopyElements(dest.raw(), destIndex, src.raw(), srcIndex, count);
 	}
 
+	@Override
+	public double l1Norm(final Matrix m) {
+		if (m instanceof DenseByteBufferMatrix) {
+			Check.checkDenseByteBufferMatrix((DenseByteBufferMatrix) m);
+			return __L1Norm(((DenseByteBufferMatrix) m).raw(), ((DenseByteBufferMatrix) m).rowMajor(), m.rows(), m.columns());
+		}
+		return parent.l1Norm(m);
+	}
+
+	@Override
+	public double l2Norm(Matrix m) {
+		if (m instanceof DenseByteBufferMatrix) {
+			Check.checkDenseByteBufferMatrix((DenseByteBufferMatrix) m);
+			return __L2Norm(((DenseByteBufferMatrix) m).raw(), ((DenseByteBufferMatrix) m).rowMajor(), m.rows(), m.columns());
+		}
+		return parent.l2Norm(m);
+	}
+
+	private static native double __L1Norm(final ByteBuffer m, final boolean rowMajor, final int rows, final int columns);
+
+	private static native double __L2Norm(final ByteBuffer m, final boolean rowMajor, final int rows, final int columns);
+
 	private static native void __CopyElements(final ByteBuffer dest, final int destIndex, final ByteBuffer src, final int srcIndex, final int count);
 
 	private static native double __Dot(final ByteBuffer v1, final ByteBuffer v2, final int size);

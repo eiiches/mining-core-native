@@ -168,4 +168,16 @@ public class NativeMathOperatorTest {
 		assertEquals(3, dest.get(1), eps);
 		assertEquals(4, dest.get(2), eps);
 	}
+
+	@Test
+	public void test_L1Norm() {
+		final Matrix m = new DenseByteBufferMatrix(M(V(1, 2), V(-3, 4)));
+		assertEquals(10, sut.l1Norm(m), eps);
+	}
+
+	@Test
+	public void test_L2Norm() {
+		final Matrix m = new DenseByteBufferMatrix(M(V(1, 2), V(-3, 4)));
+		assertEquals(Math.sqrt(30), sut.l2Norm(m), eps);
+	}
 }

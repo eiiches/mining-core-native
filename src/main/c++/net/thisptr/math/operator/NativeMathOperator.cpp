@@ -321,3 +321,38 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Cop
 		*dest_ptr++ = *src_ptr++;
 }
 
+/*
+ * Class:     net_thisptr_math_operator_NativeMathOperator
+ * Method:    __L1Norm
+ * Signature: (Ljava/nio/ByteBuffer;ZII)D
+ */
+JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1L1Norm(JNIEnv *env, jclass klass,
+		jobject buf, jboolean row_major, jint rows, jint columns)
+{
+	double *ptr = (double *) env->GetDirectBufferAddress(buf);
+	if (row_major) {
+		DenseRowMatrix m(ptr, rows, columns);
+		return m.lpNorm<1>();
+	} else {
+		DenseColMatrix m(ptr, rows, columns);
+		return m.lpNorm<1>();
+	}
+}
+
+/*
+ * Class:     net_thisptr_math_operator_NativeMathOperator
+ * Method:    __L2Norm
+ * Signature: (Ljava/nio/ByteBuffer;ZII)D
+ */
+JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1L2Norm(JNIEnv *env, jclass klass,
+		jobject buf, jboolean row_major, jint rows, jint columns)
+{
+	double *ptr = (double *) env->GetDirectBufferAddress(buf);
+	if (row_major) {
+		DenseRowMatrix m(ptr, rows, columns);
+		return m.lpNorm<2>();
+	} else {
+		DenseColMatrix m(ptr, rows, columns);
+		return m.lpNorm<2>();
+	}
+}
