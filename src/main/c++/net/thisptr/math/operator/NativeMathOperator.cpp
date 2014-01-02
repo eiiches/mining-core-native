@@ -34,10 +34,6 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 	double *x_ptr = (double *) env->GetDirectBufferAddress(x_buf);
 	double *y_ptr = (double *) env->GetDirectBufferAddress(y_buf);
 
-	DenseRowMatrix r(r_ptr, r_rows, r_columns);
-	DenseRowMatrix x(x_ptr, r_rows, k);
-	DenseRowMatrix y(y_ptr, k, r_columns);
-
 	if (r_row_major) {
 		DenseRowMatrix r(r_ptr, r_rows, r_columns);
 		if (x_row_major) {
