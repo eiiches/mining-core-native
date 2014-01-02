@@ -55,7 +55,8 @@
 						</includePaths>
 						<options>
 							<option>-O3</option>
-							<option>-mtune=native</option>
+							<option>-v</option>
+							<option>-march=native</option>
 							<option>-fopenmp</option>
 						</options>
 					</cpp>
