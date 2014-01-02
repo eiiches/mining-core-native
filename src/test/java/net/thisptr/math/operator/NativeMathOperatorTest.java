@@ -13,6 +13,14 @@ public class NativeMathOperatorTest {
 
 	private MathOperator sut = new NativeMathOperator(TestMathOperators.nullMathOperator());
 
+	private static double[] V(final double... v) {
+		return v;
+	}
+
+	private static double[][] M(final double[]... r) {
+		return r;
+	}
+
 	@Test
 	public void test__Dot() {
 		final Vector v1 = new DenseByteBufferVector(2);
@@ -25,54 +33,78 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AssignMultiplyMatrixMatrix() {
-		final Matrix r = new DenseByteBufferMatrix(2, 4);
-		final Matrix x = new DenseByteBufferMatrix(2, 3);
-		final Matrix y = new DenseByteBufferMatrix(3, 4);
-		x.set(0, 0, 1.0);
-		y.set(0, 0, 1.0);
+		final Matrix r = new DenseByteBufferMatrix(2, 2);
+		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
 
 		sut.assignMultiply(r, x, y);
+		assertEquals(73, r.get(0, 0), eps);
+		assertEquals(83, r.get(0, 1), eps);
+		assertEquals(174, r.get(1, 0), eps);
+		assertEquals(198, r.get(1, 1), eps);
+	}
 
-		assertEquals(1.0, r.get(0, 0), eps);
-		assertEquals(0.0, r.get(1, 0), eps);
+	@Test
+	public void test__AssignMultiplyMatrixMatrixWithTranspose() {
+		final Matrix r = new DenseByteBufferMatrix(2, 2);
+		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+
+		sut.assignMultiply(r, x.transpose(), y);
+		assertEquals(107, r.get(0, 0), eps);
+		assertEquals(121, r.get(0, 1), eps);
+		assertEquals(152, r.get(1, 0), eps);
+		assertEquals(172, r.get(1, 1), eps);
 	}
 
 	@Test
 	public void test__AssignMultiplyMatrixVector() {
 		final Vector r = new DenseByteBufferVector(2);
-		final Matrix x = new DenseByteBufferMatrix(new double[][] { { 1.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0 } });
-		final Vector y = new DenseByteBufferVector(new double[] { 1.0, 2.0, 3.0 });
+		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3, 5), V(7, 11, 13)));
+		final Vector y = new DenseByteBufferVector(V(17, 19, 23));
 
 		sut.assignMultiply(r, x, y);
 
-		assertEquals(1.0, r.get(0), eps);
-		assertEquals(3.0, r.get(1), eps);
+		assertEquals(206, r.get(0), eps);
+		assertEquals(627, r.get(1), eps);
+	}
+
+	@Test
+	public void test__AssignMultiplyMatrixVectorWithTranspose() {
+		final Vector r = new DenseByteBufferVector(2);
+		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
+		final Vector y = new DenseByteBufferVector(V(11, 13));
+
+		sut.assignMultiply(r, x.transpose(), y);
+
+		assertEquals(87, r.get(0), eps);
+		assertEquals(124, r.get(1), eps);
 	}
 
 	@Test
 	public void test__AssignMultiplyMatrixScaler() {
-		final Matrix r = new DenseByteBufferMatrix(2, 1);
-		final Matrix x = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
+		final Matrix r = new DenseByteBufferMatrix(1, 2);
+		final Matrix x = new DenseByteBufferMatrix(M(V(1, 2)));
 
 		sut.assignMultiply(r, x, 2.0);
 
 		assertEquals(2.0, r.get(0, 0), eps);
-		assertEquals(4.0, r.get(1, 0), eps);
+		assertEquals(4.0, r.get(0, 1), eps);
 	}
 
 	@Test
 	public void test__AssignZeroMatrix() {
-		final Matrix r = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
+		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2)));
 
 		sut.assignZero(r);
 
 		assertEquals(0.0, r.get(0, 0), eps);
-		assertEquals(0.0, r.get(1, 0), eps);
+		assertEquals(0.0, r.get(0, 1), eps);
 	}
 
 	@Test
 	public void test__AssignZeroVector() {
-		final Vector v = new DenseByteBufferVector(new double[] { 1.0, 2.0 });
+		final Vector v = new DenseByteBufferVector(V(1, 2));
 
 		sut.assignZero(v);
 
@@ -82,42 +114,53 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AddMultiplyMatrixScaler() {
-		final Matrix r = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
-		final Matrix x = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
+		final Matrix r = new DenseByteBufferMatrix(M(V(2, 3)));
+		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7)));
 
 		sut.addMultiply(r, x, 2.0);
+		assertEquals(12, r.get(0, 0), eps);
+		assertEquals(17, r.get(0, 1), eps);
+	}
 
-		assertEquals(3.0, r.get(0, 0), eps);
-		assertEquals(6.0, r.get(1, 0), eps);
+	@Test
+	public void test__AddMultiplyMatrixMatrixScalerWithTranspose() {
+		final Matrix r = new DenseByteBufferMatrix(M(V(2), V(3)));
+		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7), V(11, 13)));
+		final Matrix y = new DenseByteBufferMatrix(M(V(17), V(19)));
+
+		sut.addMultiply(r, x.transpose(), y, 2.0);
+		assertEquals(590, r.get(0, 0), eps);
+		assertEquals(735, r.get(1, 0), eps);
 	}
 
 	@Test
 	public void test__AddMultiplyMatrixMatrixScaler() {
-		final Matrix r = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
-		final Matrix x = new DenseByteBufferMatrix(new double[][] { { 1.0, -1.0 }, { 2.0, 1.0 } });
-		final Matrix y = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
+		final Matrix r = new DenseByteBufferMatrix(M(V(2), V(3)));
+		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7), V(11, 13)));
+		final Matrix y = new DenseByteBufferMatrix(M(V(17), V(19)));
 
 		sut.addMultiply(r, x, y, 2.0);
-
-		assertEquals(-1.0, r.get(0, 0), eps);
-		assertEquals(10.0, r.get(1, 0), eps);
+		assertEquals(438, r.get(0, 0), eps);
+		assertEquals(871, r.get(1, 0), eps);
 	}
 
 	@Test
-	public void test_Add() {
-		final Matrix r = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
-		final Matrix x = new DenseByteBufferMatrix(new double[][] { { 1.0 }, { 2.0 } });
+	public void test_AddMatrix() {
+		final Matrix r = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
+		final Matrix x = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
 
 		sut.add(r, x);
 
-		assertEquals(2.0, r.get(0, 0), eps);
-		assertEquals(4.0, r.get(1, 0), eps);
+		assertEquals(13, r.get(0, 0), eps);
+		assertEquals(16, r.get(0, 1), eps);
+		assertEquals(22, r.get(1, 0), eps);
+		assertEquals(26, r.get(1, 1), eps);
 	}
 
 	@Test
 	public void test_CopyElements() {
 		final Vector dest = new DenseByteBufferVector(3);
-		final Vector src = new DenseByteBufferVector(new double[] { 1, 2, 3, 4 });
+		final Vector src = new DenseByteBufferVector(V(1, 2, 3, 4));
 
 		sut.copyElements(dest, 0, src, 1, 3);
 
