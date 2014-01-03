@@ -94,22 +94,36 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AssignZeroMatrix() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2)));
+		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2), V(3, 4)));
 
 		sut.assignZero(r);
 
 		assertEquals(0.0, r.get(0, 0), eps);
 		assertEquals(0.0, r.get(0, 1), eps);
+		assertEquals(0.0, r.get(1, 0), eps);
+		assertEquals(0.0, r.get(1, 1), eps);
+	}
+	
+	@Test
+	public void test_AssignZeroMatrixRow() {
+		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2), V(3, 4)));
+		
+		sut.assignZero(r.row(1));
+		assertEquals(1.0, r.get(0, 0), eps);
+		assertEquals(2.0, r.get(0, 1), eps);
+		assertEquals(0.0, r.get(1, 0), eps);
+		assertEquals(0.0, r.get(1, 1), eps);
 	}
 
 	@Test
 	public void test__AssignZeroVector() {
-		final Vector v = new DenseByteBufferVector(V(1, 2));
+		final Vector v = new DenseByteBufferVector(V(1, 2, 3));
 
 		sut.assignZero(v);
 
 		assertEquals(0.0, v.get(0), eps);
 		assertEquals(0.0, v.get(1), eps);
+		assertEquals(0.0, v.get(2), eps);
 	}
 
 	@Test

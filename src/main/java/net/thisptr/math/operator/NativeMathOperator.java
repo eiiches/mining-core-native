@@ -103,7 +103,7 @@ public class NativeMathOperator implements MathOperator {
 	public void assignZero(final DenseByteBufferVector v) {
 		Check.checkDenseByteBufferVector(v);
 
-		__AssignZeroVector(v.raw(), v.size());
+		__AssignZeroVector(v.raw(), v.raw().position(), v.size());
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class NativeMathOperator implements MathOperator {
 			double s,
 			int rows, int columns);
 
-	private static native void __AssignZeroVector(final ByteBuffer result, final int size);
+	private static native void __AssignZeroVector(final ByteBuffer result, final int position, final int size);
 
 	private static native void __AssignZeroMatrix(final ByteBuffer result, final boolean rowMajor, final int rows, final int columns);
 

@@ -1,6 +1,6 @@
+#include <Eigen/Core>
 #include <jni.h>
 #include <net_thisptr_math_operator_NativeMathOperator.h>
-#include <Eigen/Core>
 
 typedef typename Eigen::Map<Eigen::VectorXd, Eigen::Aligned> DenseVector;
 typedef typename Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>, Eigen::Aligned> DenseRowMatrix;
@@ -110,10 +110,10 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
  * Method:    __AssignZeroVector
  * Signature: (Ljava/nio/ByteBuffer;I)V
  */
-JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AssignZeroVector(JNIEnv *env, jclass klass, jobject v_buf, jint size)
+JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AssignZeroVector(JNIEnv *env, jclass klass, jobject v_buf, jint position, jint size)
 {
-	DenseVector v((double *) env->GetDirectBufferAddress(v_buf), size);
-	v = DenseVector::Zero(size);
+	DenseVector v((double *) (env->GetDirectBufferAddress(v_buf) + position), size);
+	v.setZero();
 }
 
 /*
@@ -126,10 +126,10 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 	double *m_ptr = (double *) env->GetDirectBufferAddress(m_buf);
 	if (m_row_major) {
 		DenseRowMatrix m(m_ptr, m_rows, m_columns);
-		m = DenseRowMatrix::Zero(m_rows, m_columns);
+		m.setZero();
 	} else {
 		DenseColMatrix m(m_ptr, m_rows, m_columns);
-		m = DenseColMatrix::Zero(m_rows, m_columns);
+		m.setZero();
 	}
 }
 
