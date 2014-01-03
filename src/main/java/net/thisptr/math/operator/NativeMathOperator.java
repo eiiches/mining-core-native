@@ -254,7 +254,7 @@ public class NativeMathOperator implements MathOperator {
 				throw new IllegalArgumentException("The vector must be backed by DirectByteBuffer.");
 			if (!ByteOrder.nativeOrder().equals(buf.order()))
 				throw new IllegalArgumentException("The byte order is not compatible with native code.");
-			if (!alignment16(buf))
+			if (!alignment16(buf, buf.position()))
 				throw new IllegalArgumentException("The alignment is not compatible with native code.");
 		}
 
@@ -268,6 +268,6 @@ public class NativeMathOperator implements MathOperator {
 				check(v.raw());
 		}
 
-		private static native boolean alignment16(final ByteBuffer buf);
+		private static native boolean alignment16(final ByteBuffer buf, int position);
 	}
 }
