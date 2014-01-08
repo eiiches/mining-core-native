@@ -47,6 +47,15 @@ public class NativeMathOperator implements MathOperator {
 		parent.assignMultiply(result, x, y);
 	}
 
+	@Override
+	public void assignMultiply(final Matrix result, final Matrix x, final Matrix y, final double s) {
+		if (result instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferMatrix) {
+			assignMultiply((DenseByteBufferMatrix) result, (DenseByteBufferMatrix) x, (DenseByteBufferMatrix) y, s);
+			return;
+		}
+		parent.assignMultiply(result, x, y, s);
+	}
+
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y) {
 		Check.checkDenseByteBufferMatrix(result, x, y);
 		assert result.columns() == y.columns();
@@ -54,6 +63,15 @@ public class NativeMathOperator implements MathOperator {
 		assert x.columns() == y.rows();
 
 		__AssignMultiplyMatrixMatrix(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), result.rows(), result.columns(), x.columns());
+	}
+
+	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
+		Check.checkDenseByteBufferMatrix(result, x, y);
+		assert result.columns() == y.columns();
+		assert result.rows() == x.rows();
+		assert x.columns() == y.rows();
+
+		__AssignMultiplyMatrixMatrixScaler(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, result.rows(), result.columns(), x.columns());
 	}
 
 	@Override
@@ -217,6 +235,12 @@ public class NativeMathOperator implements MathOperator {
 	private static native void __AssignMultiplyMatrixMatrix(final ByteBuffer result, final boolean resultRowMajor,
 			final ByteBuffer x, final boolean xRowMajor,
 			final ByteBuffer y, final boolean yRowMajor,
+			final int rows, final int columns, final int k);
+
+	private static native void __AssignMultiplyMatrixMatrixScaler(final ByteBuffer result, final boolean resultRowMajor,
+			final ByteBuffer x, final boolean xRowMajor,
+			final ByteBuffer y, final boolean yRowMajor,
+			final double s,
 			final int rows, final int columns, final int k);
 
 	private static native void __AssignMultiplyMatrixVector(final ByteBuffer result,

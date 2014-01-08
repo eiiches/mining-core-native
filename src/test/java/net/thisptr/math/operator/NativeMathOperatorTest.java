@@ -45,6 +45,19 @@ public class NativeMathOperatorTest {
 	}
 
 	@Test
+	public void test__AssignMultiplyMatrixMatrixScaler() {
+		final Matrix r = new DenseByteBufferMatrix(2, 2);
+		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+
+		sut.assignMultiply(r, x, y, 2);
+		assertEquals(73 * 2, r.get(0, 0), eps);
+		assertEquals(83 * 2, r.get(0, 1), eps);
+		assertEquals(174 * 2, r.get(1, 0), eps);
+		assertEquals(198 * 2, r.get(1, 1), eps);
+	}
+
+	@Test
 	public void test__AssignMultiplyMatrixMatrixWithTranspose() {
 		final Matrix r = new DenseByteBufferMatrix(2, 2);
 		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));

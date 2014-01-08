@@ -20,6 +20,68 @@ JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1
 
 /*
  * Class:     net_thisptr_math_operator_NativeMathOperator
+ * Method:    __AssignMultiplyMatrixMatrixScaler
+ * Signature: (Ljava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZDIII)V
+ */
+JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AssignMultiplyMatrixMatrixScaler(JNIEnv *env,
+		jclass klass,
+		jobject r_buf, jboolean r_row_major,
+		jobject x_buf, jboolean x_row_major,
+		jobject y_buf, jboolean y_row_major,
+		jdouble s,
+		jint r_rows, jint r_columns, jint k)
+{
+	double *r_ptr = (double *) env->GetDirectBufferAddress(r_buf);
+	double *x_ptr = (double *) env->GetDirectBufferAddress(x_buf);
+	double *y_ptr = (double *) env->GetDirectBufferAddress(y_buf);
+
+	if (r_row_major) {
+		DenseRowMatrix r(r_ptr, r_rows, r_columns);
+		if (x_row_major) {
+			DenseRowMatrix x(x_ptr, r_rows, k);
+			if (y_row_major) {
+				DenseRowMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			} else {
+				DenseColMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			}
+		} else {
+			DenseColMatrix x(x_ptr, r_rows, k);
+			if (y_row_major) {
+				DenseRowMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			} else {
+				DenseColMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			}
+		}
+	} else {
+		DenseColMatrix r(r_ptr, r_rows, r_columns);
+		if (x_row_major) {
+			DenseRowMatrix x(x_ptr, r_rows, k);
+			if (y_row_major) {
+				DenseRowMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			} else {
+				DenseColMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			}
+		} else {
+			DenseColMatrix x(x_ptr, r_rows, k);
+			if (y_row_major) {
+				DenseRowMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			} else {
+				DenseColMatrix y(y_ptr, k, r_columns);
+				r.noalias() = x * y * s;
+			}
+		}
+	}
+}
+
+/*
+ * Class:     net_thisptr_math_operator_NativeMathOperator
  * Method:    __AssignMultiplyMatrixMatrix
  * Signature: (Ljava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZLjava/nio/ByteBuffer;ZIII)V
  */
