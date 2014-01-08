@@ -131,7 +131,7 @@
 		<dependency>
 			<groupId>net.thisptr</groupId>
 			<artifactId>mining-core</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- logging -->
