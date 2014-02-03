@@ -59,6 +59,7 @@
 							<option>-pipe</option>
 							<option>-march=native</option>
 							<option>-fopenmp</option>
+							<option>-std=c++11</option>
 						</options>
 					</cpp>
 				</configuration>
