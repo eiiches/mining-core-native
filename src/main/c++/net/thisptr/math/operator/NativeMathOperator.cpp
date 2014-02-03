@@ -34,9 +34,9 @@ template <
 	typename B,
 	typename C,
 	typename... Rest,
-	typename std::enable_if<!std::is_same<A, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<B, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<C, JavaDenseMatrix>::value>::type *& = enabler
+	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler,
+	typename std::enable_if<!std::is_same<typename std::remove_reference<B>::type, JavaDenseMatrix>::value>::type *& = enabler,
+	typename std::enable_if<!std::is_same<typename std::remove_reference<C>::type, JavaDenseMatrix>::value>::type *& = enabler
 >
 void call(A&& a, B&& b, C&& c, JavaDenseMatrix& d, Rest&&... rest) {
 	if (d.row_major) {
@@ -54,8 +54,8 @@ template <
 	typename A,
 	typename B,
 	typename... Rest,
-	typename std::enable_if<!std::is_same<A, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<B, JavaDenseMatrix>::value>::type *& = enabler
+	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler,
+	typename std::enable_if<!std::is_same<typename std::remove_reference<B>::type, JavaDenseMatrix>::value>::type *& = enabler
 >
 void call(A&& a, B&& b, JavaDenseMatrix& c, Rest&&... rest) {
 	if (c.row_major) {
@@ -71,7 +71,7 @@ template <
 	template <typename ...> class Op,
 	typename A,
 	typename... Rest,
-	typename std::enable_if<!std::is_same<A, JavaDenseMatrix>::value>::type *& = enabler
+	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler
 >
 void call(A&& a, JavaDenseMatrix& b, Rest&&... rest) {
 	if (b.row_major) {
