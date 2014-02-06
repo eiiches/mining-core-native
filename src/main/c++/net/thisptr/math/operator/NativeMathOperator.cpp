@@ -1,101 +1,7 @@
 #include <Eigen/Core>
 #include <jni.h>
 #include <net_thisptr_math_operator_NativeMathOperator.h>
-
-typedef typename Eigen::Map<Eigen::VectorXd, Eigen::Aligned> DenseVector;
-typedef typename Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>, Eigen::Aligned> DenseRowAligned;
-typedef typename Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>, Eigen::Aligned> DenseColAligned;
-typedef typename Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>, Eigen::Unaligned> DenseRowUnaligned;
-typedef typename Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>, Eigen::Unaligned> DenseColUnaligned;
-
-#define GetBufferPointer(env, buf, offset) \
-	((double *) ((unsigned char *) (env)->GetDirectBufferAddress(buf) + (offset)))
-
-struct JavaDenseMatrix {
-	double *ptr;
-	int rows;
-	int columns;
-	bool row_major;
-
-	JavaDenseMatrix(double* ptr, int rows, int columns, bool row_major)
-		: ptr(ptr), rows(rows), columns(columns), row_major(row_major) {}
-};
-
-extern void *enabler;
-
-template <template <typename...> class Op, typename... Args>
-void call(Args&&... args) {
-	Op<Args...>()(std::forward<Args>(args)...);
-}
-
-template <
-	template <typename ...> class Op,
-	typename A,
-	typename B,
-	typename C,
-	typename... Rest,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<B>::type, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<C>::type, JavaDenseMatrix>::value>::type *& = enabler
->
-void call(A&& a, B&& b, C&& c, JavaDenseMatrix& d, Rest&&... rest) {
-	if (d.row_major) {
-		DenseRowUnaligned _d(d.ptr, d.rows, d.columns);
-		call<Op>(a, b, c, _d, std::forward<Rest>(rest)...);
-	} else {
-		DenseColUnaligned _d(d.ptr, d.rows, d.columns);
-		call<Op>(a, b, c, _d, std::forward<Rest>(rest)...);
-	}
-}
-
-
-template <
-	template <typename ...> class Op,
-	typename A,
-	typename B,
-	typename... Rest,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<B>::type, JavaDenseMatrix>::value>::type *& = enabler
->
-void call(A&& a, B&& b, JavaDenseMatrix& c, Rest&&... rest) {
-	if (c.row_major) {
-		DenseRowUnaligned _c(c.ptr, c.rows, c.columns);
-		call<Op>(a, b, _c, std::forward<Rest>(rest)...);
-	} else {
-		DenseColUnaligned _c(c.ptr, c.rows, c.columns);
-		call<Op>(a, b, _c, std::forward<Rest>(rest)...);
-	}
-}
-
-template <
-	template <typename ...> class Op,
-	typename A,
-	typename... Rest,
-	typename std::enable_if<!std::is_same<typename std::remove_reference<A>::type, JavaDenseMatrix>::value>::type *& = enabler
->
-void call(A&& a, JavaDenseMatrix& b, Rest&&... rest) {
-	if (b.row_major) {
-		DenseRowUnaligned _b(b.ptr, b.rows, b.columns);
-		call<Op>(a, _b, std::forward<Rest>(rest)...);
-	} else {
-		DenseColUnaligned _b(b.ptr, b.rows, b.columns);
-		call<Op>(a, _b, std::forward<Rest>(rest)...);
-	}
-}
-
-template <
-	template <typename ...> class Op,
-	typename... Rest
->
-void call(JavaDenseMatrix& a, Rest&&... rest) {
-	if (a.row_major) {
-		DenseRowUnaligned _a(a.ptr, a.rows, a.columns);
-		call<Op>(_a, std::forward<Rest>(rest)...);
-	} else {
-		DenseColUnaligned _a(a.ptr, a.rows, a.columns);
-		call<Op>(_a, std::forward<Rest>(rest)...);
-	}
-}
+#include "NativeMathOperator.hpp"
 
 template <typename R, typename X, typename Y, typename S>
 struct AssignMultiplyMatrixMatrixScaler {
@@ -174,7 +80,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, k, x_row_major);
 	JavaDenseMatrix y(GetBufferPointer(env, y_buf, 0), k, r_columns, y_row_major);
-	call<AssignMultiplyMatrixMatrixScaler>(r, x, y, s);
+	apply<AssignMultiplyMatrixMatrixScaler>(r, x, y, s);
 }
 
 /*
@@ -192,7 +98,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, k, x_row_major);
 	JavaDenseMatrix y(GetBufferPointer(env, y_buf, 0), k, r_columns, y_row_major);
-	call<AssignMultiplyMatrixMatrix>(r, x, y);
+	apply<AssignMultiplyMatrixMatrix>(r, x, y);
 }
 
 /*
@@ -240,7 +146,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1AssignZeroMatrix(JNIEnv *env, jclass klass, jobject m_buf, jboolean m_row_major, jint m_rows, jint m_columns)
 {
 	JavaDenseMatrix m(GetBufferPointer(env, m_buf, 0), m_rows, m_columns, m_row_major);
-	call<AssignZeroMatrix>(m);
+	apply<AssignZeroMatrix>(m);
 }
 
 /*
@@ -256,7 +162,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 {
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, r_columns, x_row_major);
-	call<AssignMultiplyMatrixScaler>(r, x, s);
+	apply<AssignMultiplyMatrixScaler>(r, x, s);
 }
 
 /*
@@ -272,7 +178,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Add
 {
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, r_columns, x_row_major);
-	call<AddMultiplyMatrixScaler>(r, x, s);
+	apply<AddMultiplyMatrixScaler>(r, x, s);
 }
 
 /*
@@ -290,7 +196,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Add
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, k, x_row_major);
 	JavaDenseMatrix y(GetBufferPointer(env, y_buf, 0), k, r_columns, y_row_major);
-	call<AddMultiplyMatrixMatrixScaler>(r, x, y, s);
+	apply<AddMultiplyMatrixMatrixScaler>(r, x, y, s);
 }
 
 /*
@@ -305,7 +211,7 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Add
 {
 	JavaDenseMatrix r(GetBufferPointer(env, r_buf, 0), r_rows, r_columns, r_row_major);
 	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, r_columns, x_row_major);
-	call<AddMatrix>(r, x);
+	apply<AddMatrix>(r, x);
 }
 
 /*
