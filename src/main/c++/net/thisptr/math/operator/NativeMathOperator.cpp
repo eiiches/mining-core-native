@@ -24,6 +24,13 @@ struct AddMultiplyMatrixMatrixScaler {
 	}
 };
 
+template <typename R, typename X, typename Y>
+struct AssignMultiplyMatrixVector {
+	void operator()(R& r, X& x, Y& y) {
+		r.noalias() = x * y;
+	}
+};
+
 template <typename R, typename X, typename S>
 struct AddMultiplyMatrixScaler {
 	void operator()(R& r, X& x, double s) {
@@ -49,6 +56,20 @@ template <typename R, typename X>
 struct AddMatrix {
 	void operator()(R& r, X& x) {
 		r += x;
+	}
+};
+
+template <typename R, typename M>
+struct L1Norm {
+	void operator()(double& result, M& m) {
+		result = m.template lpNorm<1>();
+	}
+};
+
+template <typename R, typename M>
+struct L2Norm {
+	void operator()(double& result, M m) {
+		result = m.template lpNorm<2>();
 	}
 };
 
@@ -113,18 +134,10 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Ass
 		jobject y_buf,
 		jint r_rows, jint k)
 {
-	double *x_ptr = GetBufferPointer(env, x_buf, 0);
+	JavaDenseMatrix x(GetBufferPointer(env, x_buf, 0), r_rows, k, x_row_major);
 	DenseVector r(GetBufferPointer(env, r_buf, 0), r_rows);
 	DenseVector y(GetBufferPointer(env, y_buf, 0), k);
-
-	// FIXME: use template to handle all cases
-	if (x_row_major) {
-		DenseRowAligned x(x_ptr, r_rows, k);
-		r.noalias() = x * y;
-	} else {
-		DenseColAligned x(x_ptr, r_rows, k);
-		r.noalias() = x * y;
-	}
+	apply<AssignMultiplyMatrixVector>(r, x, y);
 }
 
 /*
@@ -238,14 +251,10 @@ JNIEXPORT void JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1Cop
 JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1L1Norm(JNIEnv *env, jclass klass,
 		jobject buf, jboolean row_major, jint rows, jint columns)
 {
-	double *ptr = GetBufferPointer(env, buf, 0);
-	if (row_major) {
-		DenseRowAligned m(ptr, rows, columns);
-		return m.lpNorm<1>();
-	} else {
-		DenseColAligned m(ptr, rows, columns);
-		return m.lpNorm<1>();
-	}
+	JavaDenseMatrix m(GetBufferPointer(env, buf, 0), rows, columns, row_major);
+	double result = 0.0;
+	apply<L1Norm>(result, m);
+	return result;
 }
 
 /*
@@ -256,12 +265,8 @@ JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1
 JNIEXPORT jdouble JNICALL Java_net_thisptr_math_operator_NativeMathOperator__1_1L2Norm(JNIEnv *env, jclass klass,
 		jobject buf, jboolean row_major, jint rows, jint columns)
 {
-	double *ptr = GetBufferPointer(env, buf, 0);
-	if (row_major) {
-		DenseRowAligned m(ptr, rows, columns);
-		return m.lpNorm<2>();
-	} else {
-		DenseColAligned m(ptr, rows, columns);
-		return m.lpNorm<2>();
-	}
+	JavaDenseMatrix m(GetBufferPointer(env, buf, 0), rows, columns, row_major);
+	double result = 0.0;
+	apply<L2Norm>(result, m);
+	return result;
 }
