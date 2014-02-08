@@ -35,7 +35,7 @@ public class NativeMathOperator implements MathOperator {
 		Check.checkDenseByteBufferVector(v1, v2);
 		assert v1.size() == v2.size();
 
-		return __Dot(v1.raw(), v2.raw(), v1.size());
+		return __Dot(v1.raw(), v1.raw().position(), v2.raw(), v2.raw().position(), v1.size());
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		__AssignMultiplyMatrixMatrix(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), result.rows(), result.columns(), x.columns());
+		__AssignMultiplyMatrixMatrix(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), result.rows(), result.columns(), x.columns());
 	}
 
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
@@ -71,7 +71,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		__AssignMultiplyMatrixMatrixScaler(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, result.rows(), result.columns(), x.columns());
+		__AssignMultiplyMatrixMatrixScaler(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), s, result.rows(), result.columns(), x.columns());
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.size() == x.rows();
 		assert x.columns() == y.size();
 
-		__AssignMultiplyMatrixVector(result.raw(), x.raw(), x.rowMajor(), y.raw(), result.size(), y.size());
+		__AssignMultiplyMatrixVector(result.raw(), result.raw().position(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), result.size(), y.size());
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert result.columns() == x.columns();
 
-		__AssignMultiplyMatrixScaler(result.raw(), result.rowMajor(), x.raw(), x.rowMajor(), s, result.rows(), result.columns());
+		__AssignMultiplyMatrixScaler(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), s, result.rows(), result.columns());
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class NativeMathOperator implements MathOperator {
 	public void assignZero(final DenseByteBufferMatrix m) {
 		Check.checkDenseByteBufferMatrix(m);
 
-		__AssignZeroMatrix(m.raw(), m.rowMajor(), m.rows(), m.columns());
+		__AssignZeroMatrix(m.raw(), m.raw().position(), m.rowMajor(), m.rows(), m.columns());
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
-		__AddMultiplyMatrixScaler(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), s, self.rows(), self.columns());
+		__AddMultiplyMatrixScaler(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), s, self.rows(), self.columns());
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.columns() == y.columns();
 		assert x.columns() == y.rows();
 
-		__AddMultiplyMatrixMatrixScaler(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), y.raw(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
+		__AddMultiplyMatrixMatrixScaler(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
-		__AddMatrix(self.raw(), self.rowMajor(), x.raw(), x.rowMajor(), self.rows(), self.columns());
+		__AddMatrix(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), self.rows(), self.columns());
 	}
 
 	@Override
@@ -203,14 +203,15 @@ public class NativeMathOperator implements MathOperator {
 	public void copyElements(final DenseByteBufferVector dest, final int destIndex, final DenseByteBufferVector src, final int srcIndex, final int count) {
 		Check.checkDenseByteBufferVector(dest, src);
 
-		__CopyElements(dest.raw(), destIndex, src.raw(), srcIndex, count);
+		__CopyElements(dest.raw(), dest.raw().position(), destIndex, src.raw(), src.raw().position(), srcIndex, count);
 	}
 
 	@Override
 	public double l1Norm(final Matrix m) {
 		if (m instanceof DenseByteBufferMatrix) {
-			Check.checkDenseByteBufferMatrix((DenseByteBufferMatrix) m);
-			return __L1Norm(((DenseByteBufferMatrix) m).raw(), ((DenseByteBufferMatrix) m).rowMajor(), m.rows(), m.columns());
+			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
+			Check.checkDenseByteBufferMatrix(mm);
+			return __L1Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
 		}
 		return parent.l1Norm(m);
 	}
@@ -218,58 +219,59 @@ public class NativeMathOperator implements MathOperator {
 	@Override
 	public double l2Norm(Matrix m) {
 		if (m instanceof DenseByteBufferMatrix) {
-			Check.checkDenseByteBufferMatrix((DenseByteBufferMatrix) m);
-			return __L2Norm(((DenseByteBufferMatrix) m).raw(), ((DenseByteBufferMatrix) m).rowMajor(), m.rows(), m.columns());
+			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
+			Check.checkDenseByteBufferMatrix(mm);
+			return __L2Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
 		}
 		return parent.l2Norm(m);
 	}
 
-	private static native double __L1Norm(final ByteBuffer m, final boolean rowMajor, final int rows, final int columns);
+	private static native double __L1Norm(final ByteBuffer m, final int position, final boolean rowMajor, final int rows, final int columns);
 
-	private static native double __L2Norm(final ByteBuffer m, final boolean rowMajor, final int rows, final int columns);
+	private static native double __L2Norm(final ByteBuffer m, final int position, final boolean rowMajor, final int rows, final int columns);
 
-	private static native void __CopyElements(final ByteBuffer dest, final int destIndex, final ByteBuffer src, final int srcIndex, final int count);
+	private static native void __CopyElements(final ByteBuffer dest, final int destPosition, final int destIndex, final ByteBuffer src, final int srcPosition, final int srcIndex, final int count);
 
-	private static native double __Dot(final ByteBuffer v1, final ByteBuffer v2, final int size);
+	private static native double __Dot(final ByteBuffer v1, final int v1Position, final ByteBuffer v2, final int v2Position, final int size);
 
-	private static native void __AssignMultiplyMatrixMatrix(final ByteBuffer result, final boolean resultRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
-			final ByteBuffer y, final boolean yRowMajor,
+	private static native void __AssignMultiplyMatrixMatrix(final ByteBuffer result, final int resultPosition, final boolean resultRowMajor,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
+			final ByteBuffer y, final int yPosition, final boolean yRowMajor,
 			final int rows, final int columns, final int k);
 
-	private static native void __AssignMultiplyMatrixMatrixScaler(final ByteBuffer result, final boolean resultRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
-			final ByteBuffer y, final boolean yRowMajor,
+	private static native void __AssignMultiplyMatrixMatrixScaler(final ByteBuffer result, final int resultPosition, final boolean resultRowMajor,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
+			final ByteBuffer y, final int yPosition, final boolean yRowMajor,
 			final double s,
 			final int rows, final int columns, final int k);
 
-	private static native void __AssignMultiplyMatrixVector(final ByteBuffer result,
-			final ByteBuffer x, final boolean xRowMajor,
-			final ByteBuffer y,
+	private static native void __AssignMultiplyMatrixVector(final ByteBuffer result, final int resultPosition,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
+			final ByteBuffer y, final int yPosition,
 			int rows, int k);
 
-	private static native void __AssignMultiplyMatrixScaler(final ByteBuffer result, boolean resultRowMajor,
-			final ByteBuffer x, boolean xRowMajor,
+	private static native void __AssignMultiplyMatrixScaler(final ByteBuffer result, final int resultPosition, boolean resultRowMajor,
+			final ByteBuffer x, final int xPosition, boolean xRowMajor,
 			double s,
 			int rows, int columns);
 
 	private static native void __AssignZeroVector(final ByteBuffer result, final int position, final int size);
 
-	private static native void __AssignZeroMatrix(final ByteBuffer result, final boolean rowMajor, final int rows, final int columns);
+	private static native void __AssignZeroMatrix(final ByteBuffer result, final int position, final boolean rowMajor, final int rows, final int columns);
 
-	private static native void __AddMultiplyMatrixScaler(final ByteBuffer self, final boolean selfRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
+	private static native void __AddMultiplyMatrixScaler(final ByteBuffer self, final int position, final boolean selfRowMajor,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
 			final double s,
 			final int rows, final int columns);
 
-	private static native void __AddMultiplyMatrixMatrixScaler(final ByteBuffer self, final boolean selfRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
-			final ByteBuffer y, final boolean yRowMajor,
+	private static native void __AddMultiplyMatrixMatrixScaler(final ByteBuffer self, final int selfPosition, final boolean selfRowMajor,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
+			final ByteBuffer y, final int yPosition, final boolean yRowMajor,
 			final double s,
 			final int rows, final int columns, final int k);
 
-	private static native void __AddMatrix(final ByteBuffer self, final boolean selfRowMajor,
-			final ByteBuffer x, final boolean xRowMajor,
+	private static native void __AddMatrix(final ByteBuffer self, final int selfPosition, final boolean selfRowMajor,
+			final ByteBuffer x, final int xPosition, final boolean xRowMajor,
 			final int rows, final int columns);
 
 	private static class Check {
