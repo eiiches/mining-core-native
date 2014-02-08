@@ -26,13 +26,12 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public double dot(final Vector v1, final Vector v2) {
-		if (v1 instanceof DenseByteBufferVector && v2 instanceof DenseByteBufferVector)
+		if (Check.isNativeCompatible(v1, v2))
 			return dot((DenseByteBufferVector) v1, (DenseByteBufferVector) v2);
 		return parent.dot(v1, v2);
 	}
 
 	public double dot(final DenseByteBufferVector v1, final DenseByteBufferVector v2) {
-		Check.checkDenseByteBufferVector(v1, v2);
 		assert v1.size() == v2.size();
 
 		return __Dot(v1.raw(), v1.raw().position(), v2.raw(), v2.raw().position(), v1.size());
@@ -40,7 +39,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void assignMultiply(final Matrix result, final Matrix x, final Matrix y) {
-		if (result instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(result, x, y)) {
 			assignMultiply((DenseByteBufferMatrix) result, (DenseByteBufferMatrix) x, (DenseByteBufferMatrix) y);
 			return;
 		}
@@ -49,7 +48,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void assignMultiply(final Matrix result, final Matrix x, final Matrix y, final double s) {
-		if (result instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(result, x, y)) {
 			assignMultiply((DenseByteBufferMatrix) result, (DenseByteBufferMatrix) x, (DenseByteBufferMatrix) y, s);
 			return;
 		}
@@ -57,7 +56,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y) {
-		Check.checkDenseByteBufferMatrix(result, x, y);
 		assert result.columns() == y.columns();
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
@@ -66,7 +64,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
-		Check.checkDenseByteBufferMatrix(result, x, y);
 		assert result.columns() == y.columns();
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
@@ -76,7 +73,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void assignMultiply(final Vector result, final Matrix x, final Vector y) {
-		if (result instanceof DenseByteBufferVector && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferVector) {
+		if (Check.isNativeCompatible(result, x, y)) {
 			assignMultiply((DenseByteBufferVector) result, (DenseByteBufferMatrix) x, (DenseByteBufferVector) y);
 			return;
 		}
@@ -84,8 +81,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignMultiply(final DenseByteBufferVector result, final DenseByteBufferMatrix x, final DenseByteBufferVector y) {
-		Check.checkDenseByteBufferMatrix(x);
-		Check.checkDenseByteBufferVector(result, y);
 		assert result.size() == x.rows();
 		assert x.columns() == y.size();
 
@@ -94,7 +89,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void assignMultiply(final Matrix result, final Matrix x, final double s) {
-		if (result instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(result, x)) {
 			assignMultiply((DenseByteBufferMatrix) result, (DenseByteBufferMatrix) x, s);
 			return;
 		}
@@ -102,7 +97,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final double s) {
-		Check.checkDenseByteBufferMatrix(result, x);
 		assert result.rows() == x.rows();
 		assert result.columns() == x.columns();
 
@@ -111,7 +105,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void assignZero(final Vector v) {
-		if (v instanceof DenseByteBufferVector) {
+		if (Check.isNativeCompatible(v)) {
 			assignZero((DenseByteBufferVector) v);
 			return;
 		}
@@ -119,14 +113,12 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignZero(final DenseByteBufferVector v) {
-		Check.checkDenseByteBufferVector(v);
-
 		__AssignZeroVector(v.raw(), v.raw().position(), v.size());
 	}
 
 	@Override
 	public void assignZero(final Matrix m) {
-		if (m instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(m)) {
 			assignZero((DenseByteBufferMatrix) m);
 			return;
 		}
@@ -134,14 +126,12 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignZero(final DenseByteBufferMatrix m) {
-		Check.checkDenseByteBufferMatrix(m);
-
 		__AssignZeroMatrix(m.raw(), m.raw().position(), m.rowMajor(), m.rows(), m.columns());
 	}
 
 	@Override
 	public void addMultiply(final Matrix self, final Matrix x, final double s) {
-		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(self, x)) {
 			addMultiply((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x, s);
 			return;
 		}
@@ -149,7 +139,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void addMultiply(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x, final double s) {
-		Check.checkDenseByteBufferMatrix(self, x);
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
@@ -158,7 +147,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void addMultiply(final Matrix self, final Matrix x, final Matrix y, final double s) {
-		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix && y instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(self, x, y)) {
 			addMultiply((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x, (DenseByteBufferMatrix) y, s);
 			return;
 		}
@@ -166,7 +155,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void addMultiply(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
-		Check.checkDenseByteBufferMatrix(self, x, y);
 		assert self.rows() == x.rows();
 		assert self.columns() == y.columns();
 		assert x.columns() == y.rows();
@@ -176,7 +164,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void add(final Matrix self, final Matrix x) {
-		if (self instanceof DenseByteBufferMatrix && x instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(self, x)) {
 			add((DenseByteBufferMatrix) self, (DenseByteBufferMatrix) x);
 			return;
 		}
@@ -184,7 +172,6 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void add(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x) {
-		Check.checkDenseByteBufferMatrix(self, x);
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
@@ -193,7 +180,7 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public void copyElements(final Vector dest, final int destIndex, final Vector src, final int srcIndex, final int count) {
-		if (dest instanceof DenseByteBufferVector && src instanceof DenseByteBufferVector) {
+		if (Check.isNativeCompatible(dest, src)) {
 			copyElements((DenseByteBufferVector) dest, destIndex, (DenseByteBufferVector) src, srcIndex, count);
 			return;
 		}
@@ -201,16 +188,13 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void copyElements(final DenseByteBufferVector dest, final int destIndex, final DenseByteBufferVector src, final int srcIndex, final int count) {
-		Check.checkDenseByteBufferVector(dest, src);
-
 		__CopyElements(dest.raw(), dest.raw().position(), destIndex, src.raw(), src.raw().position(), srcIndex, count);
 	}
 
 	@Override
 	public double l1Norm(final Matrix m) {
-		if (m instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(m)) {
 			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
-			Check.checkDenseByteBufferMatrix(mm);
 			return __L1Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
 		}
 		return parent.l1Norm(m);
@@ -218,9 +202,8 @@ public class NativeMathOperator implements MathOperator {
 
 	@Override
 	public double l2Norm(Matrix m) {
-		if (m instanceof DenseByteBufferMatrix) {
+		if (Check.isNativeCompatible(m)) {
 			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
-			Check.checkDenseByteBufferMatrix(mm);
 			return __L2Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
 		}
 		return parent.l2Norm(m);
@@ -275,21 +258,26 @@ public class NativeMathOperator implements MathOperator {
 			final int rows, final int columns);
 
 	private static class Check {
-		private static void check(final ByteBuffer buf) {
+		private static boolean isNativeCompatible(final ByteBuffer buf) {
 			if (!buf.isDirect())
-				throw new IllegalArgumentException("The vector must be backed by DirectByteBuffer.");
+				return false;
 			if (!ByteOrder.nativeOrder().equals(buf.order()))
-				throw new IllegalArgumentException("The byte order is not compatible with native code.");
+				return false;
+			return true;
 		}
-
-		private static void checkDenseByteBufferMatrix(final DenseByteBufferMatrix... ms) {
-			for (final DenseByteBufferMatrix m : ms)
-				check(m.raw());
-		}
-
-		private static void checkDenseByteBufferVector(final DenseByteBufferVector... vs) {
-			for (final DenseByteBufferVector v : vs)
-				check(v.raw());
+		private static boolean isNativeCompatible(final Matrix... ms) {
+			for (final Matrix m : ms) {
+				if (m instanceof DenseByteBufferMatrix) {
+					if (!isNativeCompatible(((DenseByteBufferMatrix) m).raw()))
+						return false;
+				} else if (m instanceof DenseByteBufferVector) {
+					if (!isNativeCompatible(((DenseByteBufferVector) m).raw()))
+						return false;
+				} else {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }
