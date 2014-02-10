@@ -5,6 +5,7 @@ import net.thisptr.math.matrix.DenseByteBufferMatrix;
 import net.thisptr.math.matrix.Matrix;
 import net.thisptr.math.vector.DenseByteBufferVector;
 import net.thisptr.math.vector.Vector;
+import net.thisptr.math.vector.VectorShape;
 
 import org.junit.Test;
 
@@ -34,8 +35,8 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixMatrix() {
 		final Matrix r = new DenseByteBufferMatrix(2, 2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
-		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(2, 2, M(V(11, 13), V(17, 19)));
 
 		sut.assignMultiply(r, x, y);
 		assertEquals(73, r.get(0, 0), eps);
@@ -47,8 +48,8 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixMatrixScaler() {
 		final Matrix r = new DenseByteBufferMatrix(2, 2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
-		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(2, 2, M(V(11, 13), V(17, 19)));
 
 		sut.assignMultiply(r, x, y, 2);
 		assertEquals(73 * 2, r.get(0, 0), eps);
@@ -60,8 +61,8 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixMatrixWithTranspose() {
 		final Matrix r = new DenseByteBufferMatrix(2, 2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
-		final Matrix y = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(2, 3), V(5, 7)));
+		final Matrix y = new DenseByteBufferMatrix(2, 2, M(V(11, 13), V(17, 19)));
 
 		sut.assignMultiply(r, x.transpose(), y);
 		assertEquals(107, r.get(0, 0), eps);
@@ -73,8 +74,8 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixVector() {
 		final Vector r = new DenseByteBufferVector(2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3, 5), V(7, 11, 13)));
-		final Vector y = new DenseByteBufferVector(V(17, 19, 23));
+		final Matrix x = new DenseByteBufferMatrix(2, 3, M(V(2, 3, 5), V(7, 11, 13)));
+		final Vector y = new DenseByteBufferVector(3, VectorShape.Column, V(17, 19, 23));
 
 		sut.assignMultiply(r, x, y);
 
@@ -85,8 +86,8 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixVectorWithTranspose() {
 		final Vector r = new DenseByteBufferVector(2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
-		final Vector y = new DenseByteBufferVector(V(11, 13));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(2, 3), V(5, 7)));
+		final Vector y = new DenseByteBufferVector(2, VectorShape.Column, V(11, 13));
 
 		sut.assignMultiply(r, x.transpose(), y);
 
@@ -97,7 +98,7 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test__AssignMultiplyMatrixScaler() {
 		final Matrix r = new DenseByteBufferMatrix(1, 2);
-		final Matrix x = new DenseByteBufferMatrix(M(V(1, 2)));
+		final Matrix x = new DenseByteBufferMatrix(1, 2, M(V(1, 2)));
 
 		sut.assignMultiply(r, x, 2.0);
 
@@ -107,7 +108,7 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AssignZeroMatrix() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2), V(3, 4)));
+		final Matrix r = new DenseByteBufferMatrix(2, 2, M(V(1, 2), V(3, 4)));
 
 		sut.assignZero(r);
 
@@ -119,7 +120,7 @@ public class NativeMathOperatorTest {
 	
 	@Test
 	public void test_AssignZeroMatrixRow() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(1, 2), V(3, 4)));
+		final Matrix r = new DenseByteBufferMatrix(2, 2, M(V(1, 2), V(3, 4)));
 		
 		sut.assignZero(r.row(1));
 		assertEquals(1.0, r.get(0, 0), eps);
@@ -130,7 +131,7 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AssignZeroVector() {
-		final Vector v = new DenseByteBufferVector(V(1, 2, 3));
+		final Vector v = new DenseByteBufferVector(3, VectorShape.Column, V(1, 2, 3));
 
 		sut.assignZero(v);
 
@@ -141,8 +142,8 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AddMultiplyMatrixScaler() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(2, 3)));
-		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7)));
+		final Matrix r = new DenseByteBufferMatrix(1, 2, M(V(2, 3)));
+		final Matrix x = new DenseByteBufferMatrix(1, 2, M(V(5, 7)));
 
 		sut.addMultiply(r, x, 2.0);
 		assertEquals(12, r.get(0, 0), eps);
@@ -151,9 +152,9 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AddMultiplyMatrixMatrixScalerWithTranspose() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(2), V(3)));
-		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7), V(11, 13)));
-		final Matrix y = new DenseByteBufferMatrix(M(V(17), V(19)));
+		final Matrix r = new DenseByteBufferMatrix(2, 1, M(V(2), V(3)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(5, 7), V(11, 13)));
+		final Matrix y = new DenseByteBufferMatrix(2, 1, M(V(17), V(19)));
 
 		sut.addMultiply(r, x.transpose(), y, 2.0);
 		assertEquals(590, r.get(0, 0), eps);
@@ -162,9 +163,9 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test__AddMultiplyMatrixMatrixScaler() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(2), V(3)));
-		final Matrix x = new DenseByteBufferMatrix(M(V(5, 7), V(11, 13)));
-		final Matrix y = new DenseByteBufferMatrix(M(V(17), V(19)));
+		final Matrix r = new DenseByteBufferMatrix(2, 1, M(V(2), V(3)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(5, 7), V(11, 13)));
+		final Matrix y = new DenseByteBufferMatrix(2, 1, M(V(17), V(19)));
 
 		sut.addMultiply(r, x, y, 2.0);
 		assertEquals(438, r.get(0, 0), eps);
@@ -173,8 +174,8 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test_AddMatrix() {
-		final Matrix r = new DenseByteBufferMatrix(M(V(2, 3), V(5, 7)));
-		final Matrix x = new DenseByteBufferMatrix(M(V(11, 13), V(17, 19)));
+		final Matrix r = new DenseByteBufferMatrix(2, 2, M(V(2, 3), V(5, 7)));
+		final Matrix x = new DenseByteBufferMatrix(2, 2, M(V(11, 13), V(17, 19)));
 
 		sut.add(r, x);
 
@@ -187,7 +188,7 @@ public class NativeMathOperatorTest {
 	@Test
 	public void test_CopyElements() {
 		final Vector dest = new DenseByteBufferVector(3);
-		final Vector src = new DenseByteBufferVector(V(1, 2, 3, 4));
+		final Vector src = new DenseByteBufferVector(4, VectorShape.Column, V(1, 2, 3, 4));
 
 		sut.copyElements(dest, 0, src, 1, 3);
 
@@ -198,13 +199,13 @@ public class NativeMathOperatorTest {
 
 	@Test
 	public void test_L1Norm() {
-		final Matrix m = new DenseByteBufferMatrix(M(V(1, 2), V(-3, 4)));
+		final Matrix m = new DenseByteBufferMatrix(2, 2, M(V(1, 2), V(-3, 4)));
 		assertEquals(10, sut.l1Norm(m), eps);
 	}
 
 	@Test
 	public void test_L2Norm() {
-		final Matrix m = new DenseByteBufferMatrix(M(V(1, 2), V(-3, 4)));
+		final Matrix m = new DenseByteBufferMatrix(2, 2, M(V(1, 2), V(-3, 4)));
 		assertEquals(Math.sqrt(30), sut.l2Norm(m), eps);
 	}
 }

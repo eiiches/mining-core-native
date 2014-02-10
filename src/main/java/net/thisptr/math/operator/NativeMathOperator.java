@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import net.thisptr.MiningCoreNative;
 import net.thisptr.math.matrix.DenseByteBufferMatrix;
 import net.thisptr.math.matrix.Matrix;
+import net.thisptr.math.matrix.StorageOrder;
 import net.thisptr.math.vector.DenseByteBufferVector;
 import net.thisptr.math.vector.Vector;
 
@@ -60,7 +61,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		__AssignMultiplyMatrixMatrix(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), result.rows(), result.columns(), x.columns());
+		__AssignMultiplyMatrixMatrix(result.raw(), result.raw().position(), isRowMajor(result), x.raw(), x.raw().position(), isRowMajor(x), y.raw(), y.raw().position(), isRowMajor(y), result.rows(), result.columns(), x.columns());
 	}
 
 	public void assignMultiply(final DenseByteBufferMatrix result, final DenseByteBufferMatrix x, final DenseByteBufferMatrix y, final double s) {
@@ -68,7 +69,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert x.columns() == y.rows();
 
-		__AssignMultiplyMatrixMatrixScaler(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), s, result.rows(), result.columns(), x.columns());
+		__AssignMultiplyMatrixMatrixScaler(result.raw(), result.raw().position(), isRowMajor(result), x.raw(), x.raw().position(), isRowMajor(x), y.raw(), y.raw().position(), isRowMajor(y), s, result.rows(), result.columns(), x.columns());
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.size() == x.rows();
 		assert x.columns() == y.size();
 
-		__AssignMultiplyMatrixVector(result.raw(), result.raw().position(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), result.size(), y.size());
+		__AssignMultiplyMatrixVector(result.raw(), result.raw().position(), x.raw(), x.raw().position(), isRowMajor(x), y.raw(), y.raw().position(), result.size(), y.size());
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class NativeMathOperator implements MathOperator {
 		assert result.rows() == x.rows();
 		assert result.columns() == x.columns();
 
-		__AssignMultiplyMatrixScaler(result.raw(), result.raw().position(), result.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), s, result.rows(), result.columns());
+		__AssignMultiplyMatrixScaler(result.raw(), result.raw().position(), isRowMajor(result), x.raw(), x.raw().position(), isRowMajor(x), s, result.rows(), result.columns());
 	}
 
 	@Override
@@ -126,7 +127,7 @@ public class NativeMathOperator implements MathOperator {
 	}
 
 	public void assignZero(final DenseByteBufferMatrix m) {
-		__AssignZeroMatrix(m.raw(), m.raw().position(), m.rowMajor(), m.rows(), m.columns());
+		__AssignZeroMatrix(m.raw(), m.raw().position(), isRowMajor(m), m.rows(), m.columns());
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
-		__AddMultiplyMatrixScaler(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), s, self.rows(), self.columns());
+		__AddMultiplyMatrixScaler(self.raw(), self.raw().position(), isRowMajor(self), x.raw(), x.raw().position(), isRowMajor(x), s, self.rows(), self.columns());
 	}
 
 	@Override
@@ -159,7 +160,7 @@ public class NativeMathOperator implements MathOperator {
 		assert self.columns() == y.columns();
 		assert x.columns() == y.rows();
 
-		__AddMultiplyMatrixMatrixScaler(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), y.raw(), y.raw().position(), y.rowMajor(), s, self.rows(), self.columns(), x.columns());
+		__AddMultiplyMatrixMatrixScaler(self.raw(), self.raw().position(), isRowMajor(self), x.raw(), x.raw().position(), isRowMajor(x), y.raw(), y.raw().position(), isRowMajor(y), s, self.rows(), self.columns(), x.columns());
 	}
 
 	@Override
@@ -171,11 +172,15 @@ public class NativeMathOperator implements MathOperator {
 		parent.add(self, x);
 	}
 
+	private boolean isRowMajor(final DenseByteBufferMatrix m) {
+		return m.storageOrder() == StorageOrder.RowMajor;
+	}
+
 	public void add(final DenseByteBufferMatrix self, final DenseByteBufferMatrix x) {
 		assert self.rows() == x.rows();
 		assert self.columns() == x.columns();
 
-		__AddMatrix(self.raw(), self.raw().position(), self.rowMajor(), x.raw(), x.raw().position(), x.rowMajor(), self.rows(), self.columns());
+		__AddMatrix(self.raw(), self.raw().position(), isRowMajor(self), x.raw(), x.raw().position(), isRowMajor(x), self.rows(), self.columns());
 	}
 
 	@Override
@@ -195,7 +200,7 @@ public class NativeMathOperator implements MathOperator {
 	public double l1Norm(final Matrix m) {
 		if (Check.isNativeCompatible(m)) {
 			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
-			return __L1Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
+			return __L1Norm(mm.raw(), mm.raw().position(), isRowMajor(mm), m.rows(), m.columns());
 		}
 		return parent.l1Norm(m);
 	}
@@ -204,7 +209,7 @@ public class NativeMathOperator implements MathOperator {
 	public double l2Norm(Matrix m) {
 		if (Check.isNativeCompatible(m)) {
 			final DenseByteBufferMatrix mm = (DenseByteBufferMatrix) m;
-			return __L2Norm(mm.raw(), mm.raw().position(), mm.rowMajor(), m.rows(), m.columns());
+			return __L2Norm(mm.raw(), mm.raw().position(), isRowMajor(mm), m.rows(), m.columns());
 		}
 		return parent.l2Norm(m);
 	}
@@ -265,6 +270,7 @@ public class NativeMathOperator implements MathOperator {
 				return false;
 			return true;
 		}
+
 		private static boolean isNativeCompatible(final Matrix... ms) {
 			for (final Matrix m : ms) {
 				if (m instanceof DenseByteBufferMatrix) {
